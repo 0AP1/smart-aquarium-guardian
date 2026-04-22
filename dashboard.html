@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Aquarium Management System</title>
+    <meta name="description" content="Monitor your aquarium metrics in real-time.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-layout">
+    <div class="ocean-bg">
+        <div class="bubbles" id="bubbles-container"></div>
+    </div>
+
+    <nav class="navbar glass">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #001f3f;">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+            </div>
+            <span class="logo-text">Aquarium Manager</span>
+        </div>
+        <button class="logout-btn" id="logout-btn">Log Out</button>
+    </nav>
+
+    <main class="main-content">
+        <div class="welcome-section">
+            <div class="welcome-info">
+                <div>
+                    <h2>Welcome Back, Admin</h2>
+                    <p style="color: var(--text-muted);">Systems operational. All fish are healthy.</p>
+                </div>
+                <div class="live-clock" id="live-clock">21:45:12</div>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="metric-card glass" style="animation-delay: 0.1s;">
+            <div class="metric-header">
+                <span class="metric-title">Water Temperature</span>
+                <span class="metric-icon">🌡️</span>
+            </div>
+            <div class="metric-value">26.4°C</div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 75%;"></div>
+            </div>
+            <div class="metric-footer">Status: Optimal Range</div>
+        </div>
+
+        <div class="metric-card glass" style="animation-delay: 0.2s;">
+            <div class="metric-header">
+                <span class="metric-title">Next Feeding</span>
+                <span class="metric-icon">🍲</span>
+            </div>
+            <div class="metric-value">06:00 PM</div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 40%; background: var(--secondary-main);"></div>
+            </div>
+            <div class="metric-footer">Time Remaining: 2h 15m</div>
+        </div>
+
+        <div class="metric-card glass" style="animation-delay: 0.3s;">
+            <div class="metric-header">
+                <span class="metric-title">pH Level</span>
+                <span class="metric-icon">🧪</span>
+            </div>
+            <div class="metric-value">7.2 pH</div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 85%; background: #4dfa62;"></div>
+            </div>
+            <div class="metric-footer">Neutral Balance</div>
+        </div>
+
+        <div class="metric-card glass" style="animation-delay: 0.4s;">
+            <div class="metric-header">
+                <span class="metric-title">Oxygen Level</span>
+                <span class="metric-icon">🫧</span>
+            </div>
+            <div class="metric-value">92%</div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 92%; background: var(--accent);"></div>
+            </div>
+            <div class="metric-footer">Excellent Saturation</div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
