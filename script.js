@@ -129,3 +129,78 @@ function animateProgressBars() {
         });
     }, 500);
 }
+
+
+// CLOCK
+function updateClock() {
+    const clock = document.getElementById("live-clock");
+    if (!clock) return;
+
+    const now = new Date();
+    clock.textContent = now.toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+
+// NOTIFICATION SYSTEM
+const notificationBtn = document.getElementById("notification-btn");
+const dropdown = document.getElementById("notification-dropdown");
+const list = document.getElementById("notification-list");
+const badge = document.getElementById("notification-count");
+
+let notifications = [];
+
+// Toggle dropdown
+notificationBtn.addEventListener("click", () => {
+    dropdown.style.display =
+        dropdown.style.display === "flex" ? "none" : "flex";
+});
+
+// Add notification
+function addNotification(message) {
+    notifications.unshift(message);
+
+    const li = document.createElement("li");
+    li.textContent = message;
+    list.prepend(li);
+
+    badge.textContent = notifications.length;
+}
+
+// NEXT FEEDING NOTIFICATION
+function checkFeeding() {
+    const now = new Date();
+    const currentHour = now.getHours();
+
+    // Example: Feeding at 18:00 (6 PM)
+    if (currentHour === 17) {
+        addNotification("⏰ Feeding time in 1 hour");
+    }
+}
+
+// OXYGEN CHECK
+function checkOxygen() {
+    const oxygenValue = 92; // replace with dynamic later
+
+    if (oxygenValue < 85) {
+        addNotification("⚠️ Oxygen level is LOW!");
+        
+        // Browser Notification
+        if (Notification.permission === "granted") {
+            new Notification("Aquarium Alert", {
+                body: "Oxygen level dropped below 85%",
+            });
+        }
+    }
+}
+
+// REQUEST PERMISSION
+if ("Notification" in window) {
+    Notification.requestPermission();
+}
+
+// RUN CHECKS
+setInterval(checkFeeding, 60000);
+setInterval(checkOxygen, 5000);
+
+// DEMO INITIAL NOTIFICATION
+addNotification("✅ System running smoothly");

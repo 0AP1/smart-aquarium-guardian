@@ -12,17 +12,35 @@
         <div class="bubbles" id="bubbles-container"></div>
     </div>
 
-    <nav class="navbar glass">
-        <div class="logo">
-            <div class="logo-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #001f3f;">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                </svg>
-            </div>
-            <span class="logo-text">Aquarium Manager</span>
+    <!-- NAVBAR (UPDATED) -->
+<nav class="navbar glass">
+    <div class="logo">
+        <div class="logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
         </div>
+        <span class="logo-text">Aquarium Manager</span>
+    </div>
+
+    <div class="nav-actions">
+        <!-- 🔔 Notification Bell -->
+        <div class="notification-container">
+            <button class="notification-btn" id="notification-btn">
+                🔔
+                <span class="notification-badge" id="notification-count">0</span>
+            </button>
+
+            <!-- Dropdown -->
+            <div class="notification-dropdown glass" id="notification-dropdown">
+                <h4>Notifications</h4>
+                <ul id="notification-list"></ul>
+            </div>
+        </div>
+
         <button class="logout-btn" id="logout-btn">Log Out</button>
-    </nav>
+    </div>
+</nav>
 
     <main class="main-content">
         <div class="welcome-section">
