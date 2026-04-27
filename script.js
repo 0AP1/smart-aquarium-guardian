@@ -1,3 +1,16 @@
+
+const alertSound = document.getElementById("alert-sound");
+
+// Play sound safely
+function playAlertSound() {
+    if (!alertSound) return;
+
+    alertSound.currentTime = 0;
+    alertSound.play().catch(() => {
+        console.log("Sound blocked until user interacts");
+    });
+}
+
 /**
  * Aquarium Management System
  * Core Script for Login and Dashboard
@@ -156,7 +169,7 @@ notificationBtn.addEventListener("click", () => {
 });
 
 // Add notification
-function addNotification(message) {
+function addNotification(message, isCritical = false) {
     notifications.unshift(message);
 
     const li = document.createElement("li");
@@ -164,6 +177,10 @@ function addNotification(message) {
     list.prepend(li);
 
     badge.textContent = notifications.length;
+
+    if (isCritical) {
+        playAlertSound();
+    }
 }
 
 // NEXT FEEDING NOTIFICATION
@@ -179,12 +196,15 @@ function checkFeeding() {
 
 // OXYGEN CHECK
 function checkOxygen() {
-    const oxygenValue = 92; // replace with dynamic later
+    const oxygenValue = 92; // replace later with live data
 
     if (oxygenValue < 85) {
         addNotification("⚠️ Oxygen level is LOW!");
-        
-        // Browser Notification
+
+        // 🔊 play sound
+        playAlertSound();
+
+        // Browser notification
         if (Notification.permission === "granted") {
             new Notification("Aquarium Alert", {
                 body: "Oxygen level dropped below 85%",
@@ -204,3 +224,4 @@ setInterval(checkOxygen, 5000);
 
 // DEMO INITIAL NOTIFICATION
 addNotification("✅ System running smoothly");
+addNotification("⚠️ Oxygen level is LOW!", true);
