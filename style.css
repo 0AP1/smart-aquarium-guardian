@@ -229,6 +229,9 @@ input:focus {
     justify-content: space-between;
     align-items: center;
     margin: 20px;
+
+    position: relative;   /* ADD THIS */
+    z-index: 1000;        /* ADD THIS */
 }
 
 .logo {
@@ -290,6 +293,11 @@ input:focus {
     font-size: 1.2rem;
     color: var(--primary-main);
     font-weight: 600;
+}
+
+.metric-card {
+    position: relative;
+    z-index: 1;
 }
 
 .metric-card {
@@ -355,14 +363,15 @@ input:focus {
 
 .notification-dropdown {
     position: absolute;
-    top: 45px;
+    top: 55px;
     right: 0;
     width: 260px;
     padding: 15px;
     display: none;
     flex-direction: column;
     gap: 10px;
-    z-index: 100;
+
+    z-index: 9999;   /* increase */
 }
 
 .notification-dropdown h4 {
