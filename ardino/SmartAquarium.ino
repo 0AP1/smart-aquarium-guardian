@@ -61,3 +61,19 @@ long duration = pulseIn(ECHO, HIGH);
 float distance = duration * 0.034 / 2;
 float waterLevel = tankHeight - distance;
 waterPercent = (waterLevel / tankHeight) * 100;
+
+
+#define BUZZER 19
+#define LED 25
+float minTemp=18, maxTemp=30, minLevel=50, maxLevel=90;
+bool alertState = false;
+
+void checkAlerts(){
+  alertState = false;
+  if(temperature < minTemp || temperature > maxTemp) alertState = true;
+  if(waterPercent < minLevel || waterPercent > maxLevel) alertState = true;
+  digitalWrite(LED, alertState);
+  if(alertState){
+    if(millis() - lastBeep >= 500){ beepState = !beepState; digitalWrite(BUZZER, beepState); lastBeep = millis(); }
+  } else { digitalWrite(BUZZER, LOW); }
+}
