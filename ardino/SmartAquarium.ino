@@ -77,3 +77,16 @@ void checkAlerts(){
     if(millis() - lastBeep >= 500){ beepState = !beepState; digitalWrite(BUZZER, beepState); lastBeep = millis(); }
   } else { digitalWrite(BUZZER, LOW); }
 }
+
+#define BUTTON_PIN 27
+bool lastButtonState = HIGH;
+unsigned long lastDebounce = 0;
+// In loop():
+bool current = digitalRead(BUTTON_PIN);
+if(current==LOW && lastButtonState==HIGH){
+  if(millis()-lastDebounce > 300){
+    feedFish("BUTTON");
+    lastDebounce = millis();
+  }
+}
+lastButtonState = current;
