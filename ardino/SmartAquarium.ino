@@ -90,3 +90,21 @@ if(current==LOW && lastButtonState==HIGH){
   }
 }
 lastButtonState = current;
+
+int h1,m1,s1, h2,m2,s2;
+// In loop():
+DateTime now = rtc.now();
+if(now.hour()==h1 && now.minute()==m1 && now.second()>=s1 && now.second()<s1+2)
+  feedFish("RTC1");
+if(now.hour()==h2 && now.minute()==m2 && now.second()>=s2 && now.second()<s2+2)
+  feedFish("RTC2");
+
+  Preferences prefs;
+void saveLog(String reason){
+  DateTime now = rtc.now();
+  String logs = prefs.getString("logs","");
+  logs += reason + " at " + timeStr(now) + "\n";
+  prefs.putString("logs", logs);
+  feedCount++;
+  prefs.putInt("count", feedCount);
+}
