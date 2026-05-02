@@ -16,3 +16,12 @@ void handleDoLogin() {
     server.send(200,"text/plain","OK");
   }
 }
+
+RTC_DS3231 rtc;
+String timeStr(DateTime now){
+  char buf[20];
+  sprintf(buf,"%02d:%02d:%02d", now.hour(), now.minute(), now.second());
+  return String(buf);
+}
+// In setup():
+rtc.begin();
