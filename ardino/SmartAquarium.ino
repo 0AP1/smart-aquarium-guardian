@@ -41,3 +41,23 @@ void feedFish(String reason){
 // In setup():
 myServo.attach(18);
 myServo.write(40);
+
+
+#define ONE_WIRE_BUS 4
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+float temperature = 0;
+// In readSensors():
+sensors.requestTemperatures();
+temperature = sensors.getTempCByIndex(0);
+
+#define TRIG 12
+#define ECHO 13
+float tankHeight = 16.0;
+float waterPercent = 0;
+// In readSensors():
+digitalWrite(TRIG, HIGH); delayMicroseconds(10); digitalWrite(TRIG, LOW);
+long duration = pulseIn(ECHO, HIGH);
+float distance = duration * 0.034 / 2;
+float waterLevel = tankHeight - distance;
+waterPercent = (waterLevel / tankHeight) * 100;
