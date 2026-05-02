@@ -25,3 +25,19 @@ String timeStr(DateTime now){
 }
 // In setup():
 rtc.begin();
+
+Servo myServo;
+const int COOLDOWN = 20000;
+unsigned long lastFeed = 0;
+
+void feedFish(String reason){
+  if(millis() - lastFeed < COOLDOWN) return;
+  lastFeed = millis();
+  myServo.write(90);   // open
+  delay(400);
+  myServo.write(40);   // close
+  saveLog(reason);
+}
+// In setup():
+myServo.attach(18);
+myServo.write(40);
