@@ -55,7 +55,6 @@ float maxLevel = 90;
 bool alertState = false;
 String alertReason = "";
 
-// Beep pattern (non-blocking)
 unsigned long lastBeep = 0;
 bool beepState = false;
 
@@ -118,7 +117,6 @@ void readSensors(){
 }
 
 // ================= ALERT =================
-// Alert fires when value is ABOVE max OR BELOW min
 void checkAlerts(){
   alertState  = false;
   alertReason = "";
@@ -143,7 +141,6 @@ void checkAlerts(){
   digitalWrite(LED, alertState);
 
   if(alertState){
-    // Non-blocking 500ms beep pattern
     if(millis() - lastBeep >= 500){
       beepState = !beepState;
       digitalWrite(BUZZER, beepState);
@@ -162,114 +159,205 @@ server.send(200,"text/html",R"rawliteral(
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --teal:#009EA8;
+  --teal-dark:#007B84;
+  --teal-light:#C8EEF2;
+  --purple:#9B5DE5;
+  --gradient:linear-gradient(135deg,#00D4D4,#9B5DE5);
+  --bg:#C8E6F5;
+  --card:#ffffff;
+  --text:#1A3040;
+  --muted:#5A8099;
+  --border:#B8D8E8;
+  --danger:#F05252;
+}
 body{
-  background:#020c1b;
-  color:#ccd6f6;
-  font-family:'Rajdhani',sans-serif;
+  background:linear-gradient(160deg,#C2E4F4 0%,#D8EEF8 50%,#C8E6F5 100%);
+  font-family:'DM Sans',sans-serif;
   min-height:100vh;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
+  padding:20px;
+  position:relative;
   overflow:hidden;
 }
-.bubbles{position:fixed;width:100%;height:100%;top:0;left:0;pointer-events:none;z-index:0;}
-.bubble{
-  position:absolute;
-  bottom:-80px;
-  border-radius:50%;
-  background:rgba(0,200,255,0.07);
-  border:1px solid rgba(0,200,255,0.15);
-  animation:rise linear infinite;
+/* Subtle radial glow matching screenshot */
+body::before{
+  content:'';
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(180,225,245,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(155,93,229,0.06) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
 }
-@keyframes rise{
-  0%{transform:translateY(0) scale(1);opacity:0.6;}
-  100%{transform:translateY(-110vh) scale(1.2);opacity:0;}
-}
-.login-box{
+.card{
   position:relative;z-index:1;
-  background:rgba(2,18,40,0.85);
-  border:1px solid rgba(0,200,255,0.2);
-  border-radius:20px;
-  padding:50px 40px;
-  width:360px;
-  backdrop-filter:blur(12px);
-  box-shadow:0 0 60px rgba(0,200,255,0.08), inset 0 0 40px rgba(0,200,255,0.03);
+  background:var(--card);
+  border-radius:24px;
+  padding:44px 36px 40px;
+  width:100%;max-width:380px;
+  box-shadow:0 8px 40px rgba(0,120,150,0.12), 0 2px 8px rgba(0,0,0,0.05);
   text-align:center;
 }
-.fish-icon{font-size:52px;margin-bottom:10px;animation:swim 3s ease-in-out infinite;}
-@keyframes swim{0%,100%{transform:translateX(-6px);}50%{transform:translateX(6px);}}
+.logo{
+  width:60px;height:60px;
+  background:linear-gradient(135deg,#007B84,#009EA8);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 18px;
+  font-size:26px;
+  box-shadow:0 4px 16px rgba(0,158,168,0.35);
+}
 h1{
-  font-family:'Orbitron',monospace;
-  font-size:1.1rem;
-  letter-spacing:3px;
-  color:#64ffda;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.5rem;
+  font-weight:700;
+  color:var(--text);
   margin-bottom:4px;
+}
+.sub{
+  font-size:0.72rem;
+  letter-spacing:2.5px;
+  color:var(--teal);
   text-transform:uppercase;
+  font-weight:600;
+  margin-bottom:32px;
 }
-.sub{font-size:0.8rem;letter-spacing:2px;color:#4a6fa5;margin-bottom:36px;text-transform:uppercase;}
-.field{
-  background:rgba(0,200,255,0.04);
-  border:1px solid rgba(0,200,255,0.15);
-  border-radius:10px;
-  padding:14px 18px;
-  width:100%;
-  color:#ccd6f6;
-  font-family:'Rajdhani',sans-serif;
-  font-size:1rem;
+.field-wrap{
+  text-align:left;
   margin-bottom:14px;
-  outline:none;
-  transition:border 0.3s,box-shadow 0.3s;
 }
-.field:focus{border-color:#64ffda;box-shadow:0 0 12px rgba(100,255,218,0.12);}
-.field::placeholder{color:#4a6fa5;letter-spacing:1px;}
+.field-label{
+  font-size:0.7rem;
+  font-weight:600;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.field-label svg{opacity:0.6;}
+.field{
+  width:100%;
+  padding:13px 16px;
+  background:#F4F9FB;
+  border:1.5px solid #CCDDE6;
+  border-radius:10px;
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.95rem;
+  outline:none;
+  transition:border 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.field:focus{
+  border-color:var(--teal);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(0,158,168,0.12);
+}
+.field::placeholder{color:#9BBFCE;}
 .btn{
   width:100%;
-  padding:14px;
-  background:linear-gradient(135deg,#00c8ff22,#64ffda22);
-  border:1px solid #64ffda;
-  border-radius:10px;
-  color:#64ffda;
-  font-family:'Orbitron',monospace;
-  font-size:0.85rem;
-  letter-spacing:3px;
+  padding:15px;
+  background:linear-gradient(90deg,#00D4D4,#9B5DE5);
+  border:none;
+  border-radius:12px;
+  color:#fff;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.9rem;
+  font-weight:600;
+  letter-spacing:1.5px;
   cursor:pointer;
   transition:all 0.3s;
   text-transform:uppercase;
-  margin-top:6px;
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  box-shadow:0 4px 20px rgba(0,200,200,0.35);
 }
-.btn:hover{background:linear-gradient(135deg,#00c8ff44,#64ffda33);box-shadow:0 0 20px rgba(100,255,218,0.2);}
-#msg{margin-top:16px;color:#ff6b6b;font-size:0.85rem;letter-spacing:2px;min-height:20px;}
+.btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 28px rgba(0,200,200,0.45);
+}
+.btn:active{transform:translateY(0);}
+#msg{
+  margin-top:14px;
+  color:var(--danger);
+  font-size:0.82rem;
+  font-weight:500;
+  letter-spacing:0.5px;
+  min-height:18px;
+}
+.status-bar{
+  margin-top:28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:0.7rem;
+  color:var(--muted);
+  letter-spacing:1px;
+}
+.status-dot{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#22C55E;
+  display:inline-block;
+  margin-right:5px;
+  box-shadow:0 0 6px rgba(34,197,94,0.6);
+}
 </style>
 </head>
 <body>
-<div class="bubbles" id="bb"></div>
-<div class="login-box">
-  <div class="fish-icon"></div>
+<div class="card">
+  <div class="logo">🐠</div>
   <h1>Smart Aquarium</h1>
   <div class="sub">Guardian System</div>
-  <input class="field" id="u" placeholder="Username" autocomplete="off">
-  <input class="field" id="p" type="password" placeholder="Password">
-  <button class="btn" onclick="l()">ACCESS</button>
+
+  <div class="field-wrap">
+    <div class="field-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      User ID
+    </div>
+    <input class="field" id="u" placeholder="Enter ID string" autocomplete="off">
+  </div>
+
+  <div class="field-wrap">
+    <div class="field-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Access Key
+    </div>
+    <input class="field" id="p" type="password" placeholder="••••••••">
+  </div>
+
+  <button class="btn" onclick="l()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+    Access
+  </button>
   <p id="msg"></p>
+
+  <div class="status-bar">
+    <span><span class="status-dot"></span>SYS_NOMINAL</span>
+    <span>V. 4.2.19</span>
+  </div>
 </div>
+
 <script>
-// Generate bubbles
-const bb=document.getElementById('bb');
-for(let i=0;i<18;i++){
-  const b=document.createElement('div');
-  b.className='bubble';
-  const sz=Math.random()*50+10;
-  b.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${Math.random()*10+6}s;animation-delay:${Math.random()*8}s;`;
-  bb.appendChild(b);
-}
 function l(){
-  fetch(`/doLogin?u=${u.value}&p=${p.value}`)
+  fetch(`/doLogin?u=${encodeURIComponent(u.value)}&p=${encodeURIComponent(p.value)}`)
   .then(r=>r.text()).then(d=>{
     if(d=="OK") location.href="/";
-    else{ msg.innerText="⚠ INVALID CREDENTIALS"; }
+    else{ msg.innerText="⚠ Invalid credentials. Please try again."; }
   });
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter')l();});
@@ -301,388 +389,549 @@ server.send(200,"text/html",R"rawliteral(
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#020c1b;
-  --panel:rgba(2,18,40,0.85);
-  --border:rgba(0,200,255,0.18);
-  --accent:#64ffda;
-  --accent2:#00c8ff;
-  --warn:#ffb347;
-  --danger:#ff6b6b;
-  --text:#ccd6f6;
-  --muted:#4a6fa5;
-}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Rajdhani',sans-serif;
-  min-height:100vh;
-  padding:20px;
-  transition:background 0.5s;
+:root{
+  --teal:#009EA8;
+  --teal-dark:#007B84;
+  --teal-light:#C8EEF2;
+  --purple:#9B5DE5;
+  --gradient:linear-gradient(90deg,#00D4D4,#9B5DE5);
+  --bg:#C8E6F5;
+  --card:#ffffff;
+  --text:#1A3040;
+  --muted:#5A8099;
+  --border:#B8D8E8;
+  --danger:#F05252;
+  --warn:#F59E0B;
+  --ok:#22C55E;
 }
-body.alert-mode{background:#1a0000;}
-
-/* Bubbles BG */
-.bubbles{position:fixed;width:100%;height:100%;top:0;left:0;pointer-events:none;z-index:0;}
-.bubble{position:absolute;bottom:-80px;border-radius:50%;background:rgba(0,200,255,0.05);border:1px solid rgba(0,200,255,0.1);animation:rise linear infinite;}
-@keyframes rise{0%{transform:translateY(0);opacity:0.5;}100%{transform:translateY(-110vh);opacity:0;}}
-
-.wrapper{position:relative;z-index:1;max-width:800px;margin:0 auto;}
+*{-webkit-tap-highlight-color:transparent;}
+body{
+  background:linear-gradient(160deg,#BDE0F4 0%,#CCE9F7 40%,#C4E4F3 100%);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  padding:0 0 40px;
+  position:relative;
+}
+body::before{
+  content:'';
+  position:fixed;
+  top:0;left:0;right:0;
+  height:260px;
+  background:linear-gradient(180deg,rgba(180,225,245,0.5) 0%,transparent 100%);
+  pointer-events:none;
+  z-index:0;
+}
 
 /* Header */
-.header{text-align:center;margin-bottom:28px;}
-.header .fish{font-size:48px;animation:swim 3s ease-in-out infinite;}
-@keyframes swim{0%,100%{transform:translateX(-8px);}50%{transform:translateX(8px);}}
-.header h1{font-family:'Orbitron',monospace;font-size:1.3rem;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-top:6px;}
-.header .sub{font-size:0.75rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+.header{
+  position:relative;z-index:1;
+  text-align:center;
+  padding:28px 20px 20px;
+}
+.logo-row{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:4px;
+}
+.logo-icon{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,#007B84,#009EA8);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  box-shadow:0 4px 14px rgba(0,158,168,0.35);
+}
+h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.1rem;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:#007B84;
+}
+.sub{font-size:0.7rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;}
 
-/* Alert Banner */
+/* Alert banner */
 #alertBanner{
   display:none;
-  background:rgba(255,107,107,0.12);
-  border:1px solid rgba(255,107,107,0.4);
+  margin:0 16px 12px;
+  background:rgba(240,82,82,0.08);
+  border:1px solid rgba(240,82,82,0.3);
   border-radius:12px;
-  padding:12px 20px;
+  padding:10px 16px;
   text-align:center;
   color:var(--danger);
-  font-family:'Orbitron',monospace;
   font-size:0.75rem;
-  letter-spacing:2px;
-  margin-bottom:16px;
-  animation:pulse 1s ease-in-out infinite;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  animation:alertPulse 1.2s ease-in-out infinite;
 }
 #alertBanner.show{display:block;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+@keyframes alertPulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
 
-/* Grid */
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
-@media(max-width:480px){.grid{grid-template-columns:1fr;}}
+/* Main layout */
+.wrapper{
+  position:relative;z-index:1;
+  max-width:600px;
+  margin:0 auto;
+  padding:0 16px;
+}
 
 /* Cards */
 .card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:16px;
+  background:var(--card);
+  border-radius:20px;
   padding:20px;
-  backdrop-filter:blur(10px);
-  transition:border 0.3s,box-shadow 0.3s;
-  position:relative;
-  overflow:hidden;
+  margin-bottom:12px;
+  box-shadow:0 2px 16px rgba(0,100,130,0.08), 0 1px 3px rgba(0,0,0,0.04);
+  border:1px solid rgba(184,216,232,0.7);
 }
-.card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--accent2),transparent);
-  opacity:0.4;
+.card.alert-card{
+  border-color:rgba(240,82,82,0.3);
+  box-shadow:0 2px 16px rgba(240,82,82,0.08);
 }
-.card.alert-card{border-color:rgba(255,107,107,0.5);box-shadow:0 0 20px rgba(255,107,107,0.1);}
-.card.full{grid-column:1/-1;}
-.card-label{
-  font-size:0.65rem;letter-spacing:3px;color:var(--muted);
-  text-transform:uppercase;margin-bottom:8px;
-}
-.card-value{
-  font-family:'Orbitron',monospace;
-  font-size:2.2rem;
+.section-label{
+  font-size:0.68rem;
   font-weight:700;
-  color:var(--accent);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:18px 0 8px 2px;
+}
+
+/* Time card */
+.time-card{
+  text-align:center;
+  padding:22px 20px;
+}
+.time-sublabel{
+  font-size:0.65rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+.time-big{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:3rem;
+  font-weight:700;
+  color:#009EA8;
+  letter-spacing:4px;
   line-height:1;
 }
-.card-value.warn{color:var(--warn);}
-.card-value.danger{color:var(--danger);}
-.card-icon{font-size:24px;position:absolute;top:16px;right:18px;opacity:0.4;}
+
+/* Sensor grid */
+.sensor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:380px){.sensor-grid{grid-template-columns:1fr;}}
+
+.sensor-card{padding:18px;}
+.sensor-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.sensor-name{
+  font-size:0.65rem;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:flex;align-items:center;gap:5px;
+}
+.sensor-icon{font-size:13px;}
+.status-pill{
+  font-size:0.6rem;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:3px 9px;
+  border-radius:20px;
+  background:rgba(34,197,94,0.1);
+  color:var(--ok);
+  border:1px solid rgba(34,197,94,0.2);
+}
+.status-pill.alert{
+  background:rgba(240,82,82,0.1);
+  color:var(--danger);
+  border-color:rgba(240,82,82,0.2);
+}
+.sensor-value{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:2rem;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:10px;
+  line-height:1;
+}
+.sensor-value .unit{font-size:1rem;font-weight:500;color:var(--muted);}
+.sensor-value.ok{color:var(--text);}
+.sensor-value.danger{color:var(--danger);}
 
 /* Progress bar */
 .bar-wrap{
-  background:rgba(0,200,255,0.08);
-  border-radius:8px;
-  height:8px;
-  margin-top:12px;
+  background:#D8EEF4;
+  border-radius:6px;
+  height:6px;
   overflow:hidden;
-  border:1px solid rgba(0,200,255,0.1);
+  margin-bottom:6px;
 }
 .bar{
   height:100%;
-  border-radius:8px;
-  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  border-radius:6px;
+  background:linear-gradient(90deg,#009EA8,#00C8CC);
   transition:width 1s ease;
 }
-.bar.warn{background:linear-gradient(90deg,#ff8c00,var(--warn));}
-.bar.danger{background:linear-gradient(90deg,#cc0000,var(--danger));}
-
-/* Time card */
-.time-big{
-  font-family:'Orbitron',monospace;
-  font-size:2.6rem;
-  font-weight:900;
-  color:var(--accent);
-  text-align:center;
-  letter-spacing:4px;
+.bar.danger{background:linear-gradient(90deg,#F05252,#FF8A80);}
+.range-row{
+  display:flex;justify-content:space-between;
+  font-size:0.65rem;color:var(--muted);
 }
 
-/* Divider */
-.divider{
-  grid-column:1/-1;
-  height:1px;
-  background:linear-gradient(90deg,transparent,var(--border),transparent);
-  margin:4px 0;
+/* Feed section */
+.feed-card{padding:18px 20px;}
+.feed-row{
+  display:flex;align-items:center;justify-content:space-between;
 }
-
-/* Section title */
-.section-title{
-  grid-column:1/-1;
-  font-family:'Orbitron',monospace;
-  font-size:0.65rem;
-  letter-spacing:4px;
-  color:var(--muted);
-  text-transform:uppercase;
-  padding:8px 0 0 2px;
+.feed-info .feed-label{
+  font-size:0.65rem;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:4px;
 }
-
-/* Feed button */
+.feed-count{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:2.2rem;font-weight:700;
+  color:var(--text);
+  line-height:1;
+}
 .feed-btn{
-  width:100%;
-  padding:16px;
-  background:linear-gradient(135deg,rgba(100,255,218,0.08),rgba(0,200,255,0.08));
-  border:1px solid var(--accent);
+  display:flex;align-items:center;gap:7px;
+  padding:12px 20px;
+  background:var(--card);
+  border:1.5px solid #009EA8;
   border-radius:12px;
-  color:var(--accent);
-  font-family:'Orbitron',monospace;
+  color:#009EA8;
+  font-family:'Space Grotesk',sans-serif;
   font-size:0.8rem;
-  letter-spacing:3px;
+  font-weight:600;
+  letter-spacing:1px;
   cursor:pointer;
-  transition:all 0.3s;
+  transition:all 0.25s;
   text-transform:uppercase;
-  margin-top:10px;
 }
-.feed-btn:hover{background:linear-gradient(135deg,rgba(100,255,218,0.2),rgba(0,200,255,0.15));box-shadow:0 0 20px rgba(100,255,218,0.15);}
+.feed-btn:hover{
+  background:#E8F7F8;
+  box-shadow:0 4px 16px rgba(0,158,168,0.2);
+}
 .feed-btn:active{transform:scale(0.97);}
 
-/* Count badge */
-.count-badge{
-  display:inline-block;
-  background:rgba(100,255,218,0.1);
-  border:1px solid var(--accent);
-  border-radius:8px;
-  padding:4px 14px;
-  font-family:'Orbitron',monospace;
-  font-size:1.4rem;
-  color:var(--accent);
-  margin-top:6px;
+/* Schedule */
+.sched-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:380px){.sched-grid{grid-template-columns:1fr;}}
+.sched-card{padding:16px 18px;}
+.sched-label{
+  font-size:0.65rem;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+  display:flex;align-items:center;gap:5px;
 }
-
-/* Inputs */
-.input-row{display:flex;gap:8px;margin-top:8px;}
-.field-mini{
+.time-inputs{display:flex;gap:6px;}
+.time-field{
   flex:1;
-  background:rgba(0,200,255,0.04);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:10px;
-  color:var(--text);
-  font-family:'Rajdhani',sans-serif;
-  font-size:0.95rem;
   text-align:center;
+  padding:9px 4px;
+  background:#F2F8FB;
+  border:1.5px solid #C8DCEA;
+  border-radius:10px;
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.9rem;
+  font-weight:600;
   outline:none;
-  transition:border 0.3s;
+  transition:border 0.25s, box-shadow 0.25s;
 }
-.field-mini:focus{border-color:var(--accent);}
-.field-mini::placeholder{color:var(--muted);font-size:0.8rem;}
-.field-label{font-size:0.65rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:12px;margin-bottom:4px;}
+.time-field:focus{
+  border-color:#009EA8;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(0,158,168,0.12);
+}
+.time-field::placeholder{color:#9BBFCE;font-size:0.75rem;}
+.time-sep{
+  font-size:0.75rem;color:var(--muted);
+  display:flex;align-items:center;padding:0 1px;
+}
 
-/* Range display */
-.range-info{
-  font-size:0.75rem;color:var(--muted);margin-top:6px;letter-spacing:1px;
+/* Alert thresholds */
+.thresh-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:380px){.thresh-grid{grid-template-columns:1fr;}}
+.thresh-card{padding:16px 18px;}
+.thresh-title{
+  font-size:0.65rem;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:5px;
+}
+.minmax-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.input-group{}
+.input-group .lbl{
+  font-size:0.6rem;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:4px;
+  display:block;
+}
+.thresh-field{
+  width:100%;
+  padding:9px 10px;
+  background:#F2F8FB;
+  border:1.5px solid #C8DCEA;
+  border-radius:10px;
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.9rem;
+  font-weight:600;
+  outline:none;
+  text-align:center;
+  transition:border 0.25s, box-shadow 0.25s;
+}
+.thresh-field:focus{
+  border-color:#009EA8;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(0,158,168,0.12);
 }
 
 /* Save button */
 .save-btn{
-  width:100%;padding:14px;
-  background:linear-gradient(135deg,rgba(0,200,255,0.1),rgba(100,255,218,0.1));
-  border:1px solid var(--accent2);
-  border-radius:12px;
-  color:var(--accent2);
-  font-family:'Orbitron',monospace;
-  font-size:0.8rem;
-  letter-spacing:3px;
+  width:100%;
+  padding:15px;
+  background:linear-gradient(90deg,#009EA8,#007B84);
+  border:none;
+  border-radius:14px;
+  color:#fff;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.85rem;
+  font-weight:600;
+  letter-spacing:2px;
   cursor:pointer;
   transition:all 0.3s;
   text-transform:uppercase;
-  margin-top:8px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 18px rgba(0,158,168,0.28);
+  margin-top:4px;
 }
-.save-btn:hover{background:linear-gradient(135deg,rgba(0,200,255,0.2),rgba(100,255,218,0.15));box-shadow:0 0 20px rgba(0,200,255,0.15);}
+.save-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 24px rgba(0,158,168,0.38);
+}
+.save-btn:active{transform:translateY(0);}
+
+/* Log */
+.log-card{padding:18px 20px;}
+.log-label{
+  font-size:0.65rem;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;
+}
+.log-box{
+  background:#EEF6FA;
+  border:1px solid #C8DCEA;
+  border-radius:12px;
+  padding:14px;
+  height:170px;
+  overflow-y:auto;
+  font-size:0.78rem;
+  line-height:1.9;
+  color:var(--muted);
+  font-family:'DM Mono','DM Sans',monospace;
+}
+.log-box::-webkit-scrollbar{width:3px;}
+.log-box::-webkit-scrollbar-track{background:transparent;}
+.log-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.log-entry{display:flex;gap:8px;}
+.log-time{color:#009EA8;font-weight:600;white-space:nowrap;}
+.log-msg{color:var(--text);}
 
 /* Toast */
 #toast{
-  position:fixed;bottom:24px;right:24px;z-index:99;
-  background:rgba(2,18,40,0.95);
-  border:1px solid var(--accent);
-  border-radius:10px;
-  padding:12px 22px;
-  font-family:'Orbitron',monospace;
-  font-size:0.7rem;
-  color:var(--accent);
-  letter-spacing:2px;
+  position:fixed;bottom:20px;right:20px;z-index:99;
+  background:var(--text);
+  border-radius:12px;
+  padding:11px 20px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.75rem;
+  color:#fff;
+  letter-spacing:1px;
   opacity:0;
-  transform:translateY(10px);
-  transition:all 0.4s;
+  transform:translateY(8px);
+  transition:all 0.35s;
   pointer-events:none;
+  display:flex;align-items:center;gap:7px;
 }
 #toast.show{opacity:1;transform:translateY(0);}
-
-/* Log */
-.log-box{
-  background:rgba(0,0,0,0.4);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:14px;
-  height:160px;
-  overflow-y:auto;
-  font-size:0.82rem;
-  line-height:1.8;
-  color:#7a9fc2;
-  font-family:monospace;
-  margin-top:8px;
-}
-.log-box::-webkit-scrollbar{width:4px;}
-.log-box::-webkit-scrollbar-track{background:transparent;}
-.log-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.toast-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
 </style>
 </head>
 <body>
 
-<div class="bubbles" id="bb"></div>
+<div class="header">
+  <div class="logo-row">
+    <div class="logo-icon">🐠</div>
+    <h1>Smart Aquarium Guardian</h1>
+  </div>
+  <div class="sub">Real-time Monitoring System</div>
+</div>
 
 <div class="wrapper">
 
-  <!-- Header -->
-  <div class="header">
-    <div class="fish"></div>
-    <h1>Smart Aquarium Guardian</h1>
-    <div class="sub">Real-time Monitoring System</div>
+  <!-- Alert Banner -->
+  <div id="alertBanner">⚠ Alert: <span id="alertMsg"></span></div>
+
+  <!-- Time -->
+  <div class="card time-card">
+    <div class="time-sublabel">System Time</div>
+    <div class="time-big" id="rtc">--:--:--</div>
   </div>
 
-  <!-- Alert Banner -->
-  <div id="alertBanner">ALERT: <span id="alertMsg"></span></div>
-
-  <div class="grid">
-
-    <!-- Time -->
-    <div class="card full">
-      <div class="card-label">System Time (RTC)</div>
-      <div class="time-big" id="rtc">--:--:--</div>
-    </div>
-
+  <!-- Sensors -->
+  <div class="sensor-grid">
     <!-- Temperature -->
-    <div class="card" id="tempCard">
-      <div class="card-icon"></div>
-      <div class="card-label">Water Temperature</div>
-      <div class="card-value" id="temp">--°C</div>
+    <div class="card sensor-card" id="tempCard">
+      <div class="sensor-header">
+        <div class="sensor-name"><span class="sensor-icon">🌡</span> Water Temp</div>
+        <div class="status-pill" id="tempPill">NORMAL</div>
+      </div>
+      <div class="sensor-value" id="tempVal">--<span class="unit"> °C</span></div>
       <div class="bar-wrap"><div class="bar" id="tempBar" style="width:50%"></div></div>
-      <div class="range-info" id="tempRange">Range: -- ~ --°C</div>
+      <div class="range-row">
+        <span id="tempMin">Min --°C</span>
+        <span id="tempMax">Max --°C</span>
+      </div>
     </div>
 
     <!-- Water Level -->
-    <div class="card" id="levelCard">
-      <div class="card-icon"></div>
-      <div class="card-label">Water Level</div>
-      <div class="card-value" id="level">--%</div>
+    <div class="card sensor-card" id="levelCard">
+      <div class="sensor-header">
+        <div class="sensor-name"><span class="sensor-icon">💧</span> Water Level</div>
+        <div class="status-pill" id="levelPill">NORMAL</div>
+      </div>
+      <div class="sensor-value" id="levelVal">--<span class="unit"> %</span></div>
       <div class="bar-wrap"><div class="bar" id="levelBar" style="width:50%"></div></div>
-      <div class="range-info" id="levelRange">Range: -- ~ --%</div>
-    </div>
-
-    <div class="divider"></div>
-    <div class="section-title"> Feeding</div>
-
-    <!-- Feed Count + Button -->
-    <div class="card full">
-      <div class="card-label">Total Feed Count</div>
-      <div class="count-badge" id="count">0</div>
-      <button class="feed-btn" onclick="feed()">FEED NOW</button>
-    </div>
-
-    <div class="divider"></div>
-    <div class="section-title">Schedule</div>
-
-    <!-- Schedule 1 -->
-    <div class="card">
-      <div class="card-label">Schedule 1</div>
-      <div class="input-row">
-        <input class="field-mini" id="h1" placeholder="HH" maxlength="2">
-        <input class="field-mini" id="m1" placeholder="MM" maxlength="2">
-        <input class="field-mini" id="s1" placeholder="SS" maxlength="2">
+      <div class="range-row">
+        <span id="levelMin">Min --%</span>
+        <span id="levelMax">Max --%</span>
       </div>
     </div>
+  </div>
 
-    <!-- Schedule 2 -->
-    <div class="card">
-      <div class="card-label">Schedule 2</div>
-      <div class="input-row">
-        <input class="field-mini" id="h2" placeholder="HH" maxlength="2">
-        <input class="field-mini" id="m2" placeholder="MM" maxlength="2">
-        <input class="field-mini" id="s2" placeholder="SS" maxlength="2">
+  <!-- Feeding -->
+  <div class="section-label">Feeding</div>
+  <div class="card feed-card">
+    <div class="feed-row">
+      <div class="feed-info">
+        <div class="feed-label">Total Feeds Today</div>
+        <div class="feed-count" id="count">0</div>
+      </div>
+      <button class="feed-btn" onclick="feed()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        Feed Now
+      </button>
+    </div>
+  </div>
+
+  <!-- Schedule -->
+  <div class="section-label">Schedule</div>
+  <div class="sched-grid">
+    <div class="card sched-card">
+      <div class="sched-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Schedule 1
+      </div>
+      <div class="time-inputs">
+        <input class="time-field" id="h1" placeholder="hh" maxlength="2">
+        <span class="time-sep">:</span>
+        <input class="time-field" id="m1" placeholder="mm" maxlength="2">
+        <span class="time-sep">:</span>
+        <input class="time-field" id="s1" placeholder="ss" maxlength="2">
       </div>
     </div>
-
-    <div class="divider"></div>
-    <div class="section-title">Alert Thresholds</div>
-
-    <!-- Temp Range -->
-    <div class="card">
-      <div class="card-label">Temperature Range (°C)</div>
-      <div class="field-label">Min Temp</div>
-      <input class="field-mini" id="minT" placeholder="e.g. 22" style="width:100%;">
-      <div class="field-label">Max Temp</div>
-      <input class="field-mini" id="maxT" placeholder="e.g. 30" style="width:100%;">
+    <div class="card sched-card">
+      <div class="sched-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Schedule 2
+      </div>
+      <div class="time-inputs">
+        <input class="time-field" id="h2" placeholder="hh" maxlength="2">
+        <span class="time-sep">:</span>
+        <input class="time-field" id="m2" placeholder="mm" maxlength="2">
+        <span class="time-sep">:</span>
+        <input class="time-field" id="s2" placeholder="ss" maxlength="2">
+      </div>
     </div>
+  </div>
 
-    <!-- Level Range -->
-    <div class="card">
-      <div class="card-label">Water Level Range (%)</div>
-      <div class="field-label">Min Level</div>
-      <input class="field-mini" id="minL" placeholder="e.g. 40" style="width:100%;">
-      <div class="field-label">Max Level</div>
-      <input class="field-mini" id="maxL" placeholder="e.g. 90" style="width:100%;">
+  <!-- Alert Thresholds -->
+  <div class="section-label">Alert Thresholds</div>
+  <div class="thresh-grid">
+    <div class="card thresh-card">
+      <div class="thresh-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+        Temp Range (°C)
+      </div>
+      <div class="minmax-row">
+        <div class="input-group">
+          <span class="lbl">Min</span>
+          <input class="thresh-field" id="minT" placeholder="22">
+        </div>
+        <div class="input-group">
+          <span class="lbl">Max</span>
+          <input class="thresh-field" id="maxT" placeholder="30">
+        </div>
+      </div>
     </div>
-
-    <!-- Save -->
-    <div class="card full">
-      <button class="save-btn" onclick="save()">SAVE SETTINGS</button>
+    <div class="card thresh-card">
+      <div class="thresh-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        Level Range (%)
+      </div>
+      <div class="minmax-row">
+        <div class="input-group">
+          <span class="lbl">Min</span>
+          <input class="thresh-field" id="minL" placeholder="40">
+        </div>
+        <div class="input-group">
+          <span class="lbl">Max</span>
+          <input class="thresh-field" id="maxL" placeholder="90">
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="divider"></div>
-    <div class="section-title"> Feed Log</div>
+  <div class="card" style="padding:16px 20px;margin-bottom:12px;">
+    <button class="save-btn" onclick="save()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save Settings
+    </button>
+  </div>
 
-    <!-- Logs -->
-    <div class="card full">
-      <div class="card-label">Activity Log</div>
-      <div class="log-box" id="logs">Loading...</div>
-    </div>
+  <!-- Feed Log -->
+  <div class="section-label">Feed Log</div>
+  <div class="card log-card">
+    <div class="log-label">Activity Log</div>
+    <div class="log-box" id="logs">Loading...</div>
+  </div>
 
-  </div><!-- /grid -->
 </div><!-- /wrapper -->
 
-<div id="toast">✓ SAVED</div>
+<div id="toast"><div class="toast-dot"></div><span id="toastMsg">Saved</span></div>
 
 <script>
-// Bubbles
-const bb=document.getElementById('bb');
-for(let i=0;i<14;i++){
-  const b=document.createElement('div');
-  b.className='bubble';
-  const sz=Math.random()*40+8;
-  b.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${Math.random()*12+7}s;animation-delay:${Math.random()*10}s;`;
-  bb.appendChild(b);
-}
-
 let cachedMinT=22,cachedMaxT=30,cachedMinL=40,cachedMaxL=90;
+let rangeLoaded=false;
 
 function feed(){
   fetch('/feed').then(r=>r.text()).then(d=>{
-    if(d==="OK") showToast("FED!");
-    else showToast("COOLDOWN...");
+    showToast(d==="OK" ? "Feeding triggered!" : "Cooldown active...");
   });
 }
 
@@ -696,37 +945,48 @@ function save(){
     cachedMaxT=parseFloat(maxT.value);
     cachedMinL=parseFloat(minL.value);
     cachedMaxL=parseFloat(maxL.value);
-    updateRangeDisplay();
-    showToast("SETTINGS SAVED");
+    updateRangeLabels();
+    showToast("Settings saved!");
   });
 }
 
-function updateRangeDisplay(){
-  document.getElementById('tempRange').innerText=`Alert: < ${cachedMinT}°C or > ${cachedMaxT}°C`;
-  document.getElementById('levelRange').innerText=`Alert: < ${cachedMinL}% or > ${cachedMaxL}%`;
+function updateRangeLabels(){
+  document.getElementById('tempMin').innerText=`Min ${cachedMinT}°C`;
+  document.getElementById('tempMax').innerText=`Max ${cachedMaxT}°C`;
+  document.getElementById('levelMin').innerText=`Min ${cachedMinL}%`;
+  document.getElementById('levelMax').innerText=`Max ${cachedMaxL}%`;
 }
 
 function showToast(msg){
+  document.getElementById('toastMsg').innerText=msg;
   const t=document.getElementById('toast');
-  t.innerText='✓ '+msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  setTimeout(()=>t.classList.remove('show'),2600);
 }
 
-// Fetch data + logs
+// Data + logs
 setInterval(()=>{
   fetch('/data').then(r=>r.json()).then(d=>{
-    document.getElementById('count').innerText=d.count;
-    document.getElementById('logs').innerHTML=d.logs||'No logs yet.';
-    const lb=document.getElementById('logs');
-    lb.scrollTop=lb.scrollHeight;
-    // Load saved range into inputs once
-    if(d.minT && minT.value===''){
+    document.getElementById('count').innerText=String(d.count).padStart(2,'0');
+    // Format logs
+    const raw=(d.logs||'').split('<br>').filter(l=>l.trim());
+    if(raw.length===0){
+      document.getElementById('logs').innerHTML='<span style="color:#B8C9D4;">No activity yet.</span>';
+    } else {
+      document.getElementById('logs').innerHTML=raw.map(l=>{
+        const parts=l.split(' at ');
+        if(parts.length===2)
+          return `<div class="log-entry"><span class="log-time">[${parts[1]}]</span><span class="log-msg">${parts[0]} executed.</span></div>`;
+        return `<div class="log-entry"><span class="log-msg">${l}</span></div>`;
+      }).reverse().join('');
+    }
+    if(!rangeLoaded && d.minT){
       minT.value=d.minT; maxT.value=d.maxT;
       minL.value=d.minL; maxL.value=d.maxL;
       cachedMinT=d.minT; cachedMaxT=d.maxT;
       cachedMinL=d.minL; cachedMaxL=d.maxL;
-      updateRangeDisplay();
+      updateRangeLabels();
+      rangeLoaded=true;
     }
   });
 },1500);
@@ -738,55 +998,39 @@ setInterval(()=>{
   });
 },1000);
 
-// Sensor + alert
+// Sensor
 setInterval(()=>{
   fetch('/sensor').then(r=>r.json()).then(d=>{
     const tVal=parseFloat(d.temp);
     const lVal=parseFloat(d.level);
     const isAlert=(d.alert==1);
 
-    // Temp display
-    const tEl=document.getElementById('temp');
-    const tCard=document.getElementById('tempCard');
-    const tBar=document.getElementById('tempBar');
-    tEl.innerText=tVal.toFixed(1)+'°C';
+    // Temp
+    const tAlarm=(tVal<cachedMinT||tVal>cachedMaxT);
+    document.getElementById('tempVal').innerHTML=tVal.toFixed(1)+'<span class="unit"> °C</span>';
     const tPct=Math.min(Math.max(((tVal-10)/(50-10))*100,0),100);
-    tBar.style.width=tPct+'%';
-    if(tVal<cachedMinT||tVal>cachedMaxT){
-      tEl.className='card-value danger';
-      tBar.className='bar danger';
-      tCard.className='card alert-card';
-    } else {
-      tEl.className='card-value';
-      tBar.className='bar';
-      tCard.className='card';
-    }
+    document.getElementById('tempBar').style.width=tPct+'%';
+    document.getElementById('tempBar').className='bar'+(tAlarm?' danger':'');
+    document.getElementById('tempCard').className='card sensor-card'+(tAlarm?' alert-card':'');
+    document.getElementById('tempPill').className='status-pill'+(tAlarm?' alert':'');
+    document.getElementById('tempPill').innerText=tAlarm?'ALERT':'NORMAL';
 
-    // Level display
-    const lEl=document.getElementById('level');
-    const lCard=document.getElementById('levelCard');
-    const lBar=document.getElementById('levelBar');
-    lEl.innerText=lVal.toFixed(1)+'%';
-    lBar.style.width=lVal+'%';
-    if(lVal<cachedMinL||lVal>cachedMaxL){
-      lEl.className='card-value danger';
-      lBar.className='bar danger';
-      lCard.className='card alert-card';
-    } else {
-      lEl.className='card-value';
-      lBar.className='bar';
-      lCard.className='card';
-    }
+    // Level
+    const lAlarm=(lVal<cachedMinL||lVal>cachedMaxL);
+    document.getElementById('levelVal').innerHTML=lVal.toFixed(1)+'<span class="unit"> %</span>';
+    document.getElementById('levelBar').style.width=lVal+'%';
+    document.getElementById('levelBar').className='bar'+(lAlarm?' danger':'');
+    document.getElementById('levelCard').className='card sensor-card'+(lAlarm?' alert-card':'');
+    document.getElementById('levelPill').className='status-pill'+(lAlarm?' alert':'');
+    document.getElementById('levelPill').innerText=lAlarm?'ALERT':'NORMAL';
 
-    // Alert banner + body
+    // Banner
     const banner=document.getElementById('alertBanner');
     if(isAlert){
       banner.classList.add('show');
-      document.getElementById('alertMsg').innerText=d.reason||'CHECK SENSORS';
-      document.body.classList.add('alert-mode');
+      document.getElementById('alertMsg').innerText=d.reason||'Check sensors';
     } else {
       banner.classList.remove('show');
-      document.body.classList.remove('alert-mode');
     }
   });
 },2000);
@@ -802,7 +1046,6 @@ void handleData(){
   logs.replace("\n","<br>");
   int count = prefs.getInt("count",0);
 
-  // Also send saved thresholds so dashboard can pre-fill inputs
   String json = "{\"count\":"+String(count)+
                 ",\"logs\":\""+logs+"\""+
                 ",\"minT\":"+String(minTemp)+
@@ -819,7 +1062,6 @@ void handleTime(){
 }
 
 void handleSensor(){
-  // Escape alertReason for JSON
   String reason = alertReason;
   reason.trim();
 
