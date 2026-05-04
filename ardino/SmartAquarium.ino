@@ -15,8 +15,8 @@ WebServer server(80);
 Preferences prefs;
 
 // ================= LOGIN =================
-String loginUser = "admin";
-String loginPass = "1234";
+String loginUser = "aanchal";
+String loginPass = "tbc@2026";
 bool loggedIn = false;
 
 // ================= RTC =================
@@ -70,10 +70,26 @@ const int COOLDOWN = 20000;
 // ================= TIMER =================
 unsigned long lastSensor = 0;
 
-// ================= TIME =================
+// ================= TIME STRING =================
 String timeStr(DateTime now){
   char buf[20];
   sprintf(buf,"%02d:%02d:%02d",now.hour(),now.minute(),now.second());
+  return String(buf);
+}
+
+// ================= DATE STRING =================
+String dateStr(DateTime now){
+  char buf[15];
+  sprintf(buf,"%04d-%02d-%02d",now.year(),now.month(),now.day());
+  return String(buf);
+}
+
+// ================= DATETIME STRING =================
+String dateTimeStr(DateTime now){
+  char buf[30];
+  sprintf(buf,"%04d-%02d-%02d %02d:%02d:%02d",
+    now.year(),now.month(),now.day(),
+    now.hour(),now.minute(),now.second());
   return String(buf);
 }
 
@@ -81,7 +97,7 @@ String timeStr(DateTime now){
 void saveLog(String reason){
   DateTime now = rtc.now();
   String logs = prefs.getString("logs","");
-  logs += reason + " at " + timeStr(now) + "\n";
+  logs += reason + " at " + dateTimeStr(now) + "\n";
   prefs.putString("logs",logs);
   feedCount++;
   prefs.putInt("count",feedCount);
@@ -187,7 +203,6 @@ body{
   position:relative;
   overflow:hidden;
 }
-/* Subtle radial glow matching screenshot */
 body::before{
   content:'';
   position:fixed;
@@ -320,7 +335,7 @@ h1{
 </head>
 <body>
 <div class="card">
-  <div class="logo">🐠</div>
+  <div class=""></div>
   <h1>Smart Aquarium</h1>
   <div class="sub">Guardian System</div>
 
@@ -337,7 +352,7 @@ h1{
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       Access Key
     </div>
-    <input class="field" id="p" type="password" placeholder="••••••••">
+    <input class="field" id="p" type="password" placeholder="">
   </div>
 
   <button class="btn" onclick="l()">
@@ -347,8 +362,8 @@ h1{
   <p id="msg"></p>
 
   <div class="status-bar">
-    <span><span class="status-dot"></span>SYS_NOMINAL</span>
-    <span>V. 4.2.19</span>
+    <span><span class="status-dot"></span>Designed and developed by Aanchal Poudel</span>
+    
   </div>
 </div>
 
@@ -506,14 +521,14 @@ h1{
 /* Time card */
 .time-card{
   text-align:center;
-  padding:22px 20px;
+  padding:22px 20px 18px;
 }
 .time-sublabel{
   font-size:0.65rem;
   letter-spacing:2px;
   text-transform:uppercase;
   color:var(--muted);
-  margin-bottom:8px;
+  margin-bottom:6px;
 }
 .time-big{
   font-family:'Space Grotesk',sans-serif;
@@ -522,6 +537,22 @@ h1{
   color:#009EA8;
   letter-spacing:4px;
   line-height:1;
+}
+.date-display{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.05rem;
+  font-weight:600;
+  color:#5A8099;
+  letter-spacing:3px;
+  margin-bottom:16px;
+}
+.time-divider{
+  width:40px;
+  height:2px;
+  background:linear-gradient(90deg,#009EA8,#9B5DE5);
+  border-radius:2px;
+  margin:10px auto 14px;
+  opacity:0.4;
 }
 
 /* Sensor grid */
@@ -628,8 +659,8 @@ h1{
 .feed-btn:active{transform:scale(0.97);}
 
 /* Schedule */
-.sched-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media(max-width:380px){.sched-grid{grid-template-columns:1fr;}}
+.sched-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+
 .sched-card{padding:16px 18px;}
 .sched-label{
   font-size:0.65rem;font-weight:700;
@@ -738,17 +769,18 @@ h1{
   border:1px solid #C8DCEA;
   border-radius:12px;
   padding:14px;
-  height:170px;
+  height:200px;
   overflow-y:auto;
   font-size:0.78rem;
-  line-height:1.9;
+  line-height:2;
   color:var(--muted);
   font-family:'DM Mono','DM Sans',monospace;
 }
 .log-box::-webkit-scrollbar{width:3px;}
 .log-box::-webkit-scrollbar-track{background:transparent;}
 .log-box::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-.log-entry{display:flex;gap:8px;}
+.log-entry{display:flex;gap:8px;flex-wrap:wrap;}
+.log-date{color:#9B5DE5;font-weight:600;white-space:nowrap;font-size:0.72rem;}
 .log-time{color:#009EA8;font-weight:600;white-space:nowrap;}
 .log-msg{color:var(--text);}
 
@@ -776,10 +808,10 @@ h1{
 
 <div class="header">
   <div class="logo-row">
-    <div class="logo-icon">🐠</div>
+    <div class="logo-icon"></div>
     <h1>Smart Aquarium Guardian</h1>
   </div>
-  <div class="sub">Real-time Monitoring System</div>
+  <div class="sub">IoT-Based Automated Feeding with Temperature and Water-Level Alerts</div>
 </div>
 
 <div class="wrapper">
@@ -787,8 +819,11 @@ h1{
   <!-- Alert Banner -->
   <div id="alertBanner">⚠ Alert: <span id="alertMsg"></span></div>
 
-  <!-- Time -->
+  <!-- Time & Date Card -->
   <div class="card time-card">
+    <div class="time-sublabel">System Date</div>
+    <div class="date-display" id="rtc-date">----/--/--</div>
+    <div class="time-divider"></div>
     <div class="time-sublabel">System Time</div>
     <div class="time-big" id="rtc">--:--:--</div>
   </div>
@@ -798,8 +833,8 @@ h1{
     <!-- Temperature -->
     <div class="card sensor-card" id="tempCard">
       <div class="sensor-header">
-        <div class="sensor-name"><span class="sensor-icon">🌡</span> Water Temp</div>
-        <div class="status-pill" id="tempPill">NORMAL</div>
+        <div class="sensor-name"><span class="sensor-icon"></span> Water Temp</div>
+        <div class="status-pill" id="tempPill">OK</div>
       </div>
       <div class="sensor-value" id="tempVal">--<span class="unit"> °C</span></div>
       <div class="bar-wrap"><div class="bar" id="tempBar" style="width:50%"></div></div>
@@ -812,8 +847,8 @@ h1{
     <!-- Water Level -->
     <div class="card sensor-card" id="levelCard">
       <div class="sensor-header">
-        <div class="sensor-name"><span class="sensor-icon">💧</span> Water Level</div>
-        <div class="status-pill" id="levelPill">NORMAL</div>
+        <div class="sensor-name"><span class="sensor-icon"></span> Water Level</div>
+        <div class="status-pill" id="levelPill">OK</div>
       </div>
       <div class="sensor-value" id="levelVal">--<span class="unit"> %</span></div>
       <div class="bar-wrap"><div class="bar" id="levelBar" style="width:50%"></div></div>
@@ -964,22 +999,36 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2600);
 }
 
+// Format log entries — now with date + time
+function formatLogs(raw){
+  const lines = raw.split('<br>').filter(l=>l.trim());
+  if(lines.length===0){
+    return '<span style="color:#B8C9D4;">No activity yet.</span>';
+  }
+  return lines.map(l=>{
+    // Format: "Manual at 2025-05-03 14:32:10"
+    const atIdx = l.lastIndexOf(' at ');
+    if(atIdx !== -1){
+      const action   = l.substring(0, atIdx);
+      const datetime = l.substring(atIdx + 4);
+      const parts    = datetime.split(' ');
+      const datePart = parts[0] || '';
+      const timePart = parts[1] || '';
+      return `<div class="log-entry">` +
+             `<span class="log-date">[${datePart}]</span>` +
+             `<span class="log-time">[${timePart}]</span>` +
+             `<span class="log-msg">${action}</span>` +
+             `</div>`;
+    }
+    return `<div class="log-entry"><span class="log-msg">${l}</span></div>`;
+  }).reverse().join('');
+}
+
 // Data + logs
 setInterval(()=>{
   fetch('/data').then(r=>r.json()).then(d=>{
     document.getElementById('count').innerText=String(d.count).padStart(2,'0');
-    // Format logs
-    const raw=(d.logs||'').split('<br>').filter(l=>l.trim());
-    if(raw.length===0){
-      document.getElementById('logs').innerHTML='<span style="color:#B8C9D4;">No activity yet.</span>';
-    } else {
-      document.getElementById('logs').innerHTML=raw.map(l=>{
-        const parts=l.split(' at ');
-        if(parts.length===2)
-          return `<div class="log-entry"><span class="log-time">[${parts[1]}]</span><span class="log-msg">${parts[0]} executed.</span></div>`;
-        return `<div class="log-entry"><span class="log-msg">${l}</span></div>`;
-      }).reverse().join('');
-    }
+    document.getElementById('logs').innerHTML = formatLogs(d.logs||'');
     if(!rangeLoaded && d.minT){
       minT.value=d.minT; maxT.value=d.maxT;
       minL.value=d.minL; maxL.value=d.maxL;
@@ -991,10 +1040,11 @@ setInterval(()=>{
   });
 },1500);
 
-// RTC
+// RTC — date + time
 setInterval(()=>{
   fetch('/time').then(r=>r.json()).then(d=>{
-    document.getElementById('rtc').innerText=d.time;
+    document.getElementById('rtc').innerText = d.time;
+    if(d.date) document.getElementById('rtc-date').innerText = d.date;
   });
 },1000);
 
@@ -1013,7 +1063,7 @@ setInterval(()=>{
     document.getElementById('tempBar').className='bar'+(tAlarm?' danger':'');
     document.getElementById('tempCard').className='card sensor-card'+(tAlarm?' alert-card':'');
     document.getElementById('tempPill').className='status-pill'+(tAlarm?' alert':'');
-    document.getElementById('tempPill').innerText=tAlarm?'ALERT':'NORMAL';
+    document.getElementById('tempPill').innerText=tAlarm?'ALERT':'OK';
 
     // Level
     const lAlarm=(lVal<cachedMinL||lVal>cachedMaxL);
@@ -1022,7 +1072,7 @@ setInterval(()=>{
     document.getElementById('levelBar').className='bar'+(lAlarm?' danger':'');
     document.getElementById('levelCard').className='card sensor-card'+(lAlarm?' alert-card':'');
     document.getElementById('levelPill').className='status-pill'+(lAlarm?' alert':'');
-    document.getElementById('levelPill').innerText=lAlarm?'ALERT':'NORMAL';
+    document.getElementById('levelPill').innerText=lAlarm?'ALERT':'OK';
 
     // Banner
     const banner=document.getElementById('alertBanner');
@@ -1058,7 +1108,7 @@ void handleData(){
 void handleTime(){
   DateTime now = rtc.now();
   server.send(200,"application/json",
-  "{\"time\":\""+timeStr(now)+"\"}");
+  "{\"time\":\""+timeStr(now)+"\",\"date\":\""+dateStr(now)+"\"}");
 }
 
 void handleSensor(){
